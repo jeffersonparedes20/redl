@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "374423276406",
+    "project_id": "redl-3bf5a",
+    "storage_bucket": "redl-3bf5a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:374423276406:android:e83962f5c94af174a9c857",
+        "android_client_info": {
+          "package_name": "com.example.redl"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOpf0S8s87CgMjgvTlFpn9RxtMQVLpRPo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
