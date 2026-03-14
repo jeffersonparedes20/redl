@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../challenge/challenge_page.dart';
+import '../posts/posts_page.dart';
 
 /// Página principal de la aplicación
 class HomePage extends StatelessWidget {
@@ -31,6 +32,16 @@ class HomePage extends StatelessWidget {
 
       /// Mostramos la página del reto
       body: const ChallengePage(),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => PostsPage()),
+          );
+        },
+        child: const Icon(Icons.forum),
+      ),
     );
   }
 }

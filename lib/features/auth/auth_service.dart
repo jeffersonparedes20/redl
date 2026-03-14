@@ -57,20 +57,37 @@ class AuthService {
 
   /*INICIO DE SESIÓN
 
-  Autentica a un usuario existente con email y contraseña.
-  Devuelve:
-  - User si la autenticación es exitosa.
-  - null si ocurre un error (credenciales incorrectas, usuario no existe, etc.)
+- Intenta iniciar sesión con email y contraseña.
+- Si el inicio de sesión es exitoso, verifica si el usuario tiene un perfil en Firestore.
+- Si el perfil no existe (caso raro, pero posible), lo crea con los valores predeterminados.
+- Devuelve el usuario autenticado o null en caso de error.
   */
   Future<User?> login(String email, String password) async {
     try {
-      // Intenta iniciar sesión con las credenciales proporcionadas
       final result = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      // Devolvemos el usuario logueado
-      return result.user;
+
+      final user = result.user;
+
+      if (user != null) {
+        final userDoc = _firestore.collection('users').doc(user.uid);
+
+        final snapshot = await userDoc.get();
+
+        /// Si el usuario no existe en Firestore lo creamos
+        if (!snapshot.exists) {
+          await userDoc.set({
+            'email': email,
+            'nivel': 'Novato',
+            'puntos': 0,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+
+      return user;
     } catch (e) {
       debugPrint("Error en login: $e");
       return null;

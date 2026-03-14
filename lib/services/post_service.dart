@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/post.dart';
+import 'user_service.dart';
 
 /// Servicio que gestiona las pistas publicadas
 class PostService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final UserService _userService = UserService();
 
   /// Obtiene todas las pistas ordenadas por fecha
   Stream<List<Post>> getPosts() {
@@ -26,6 +28,9 @@ class PostService {
       'votes': 0,
       'createdAt': FieldValue.serverTimestamp(),
     });
+
+    /// Añadimos puntos al usuario
+    await _userService.addPoints(userId);
   }
 
   /// Contar número total de pistas
