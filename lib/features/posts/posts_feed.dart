@@ -15,7 +15,6 @@ class PostsFeed extends StatelessWidget {
           .orderBy('createdAt', descending: true)
           .limit(20)
           .snapshots(),
-
       builder: (context, snapshot) {
         // ⏳ Cargando
         if (!snapshot.hasData) {
@@ -40,20 +39,20 @@ class PostsFeed extends StatelessWidget {
           itemBuilder: (context, index) {
             final postDoc = posts[index];
             final data = postDoc.data() as Map<String, dynamic>;
+            final userId = FirebaseAuth.instance.currentUser!.uid;
 
             return Container(
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
               padding: const EdgeInsets.all(14),
-
               decoration: BoxDecoration(
                 color: const Color(0xFF1F2937),
                 borderRadius: BorderRadius.circular(12),
-                // ignore: deprecated_member_use
-                border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+                border: Border.all(
+                  color: Colors.redAccent.withValues(alpha: 0.4),
+                ),
                 boxShadow: [
                   BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.black.withOpacity(0.4),
+                    color: Colors.black.withValues(alpha: 0.4),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
                   ),
@@ -92,10 +91,11 @@ class PostsFeed extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  /// 👍 Votos + botón
+                  /// 👍 Votos + botón dinámico
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      /// Contador votos
                       Row(
                         children: [
                           const Icon(
@@ -114,13 +114,30 @@ class PostsFeed extends StatelessWidget {
                         ],
                       ),
 
-                      IconButton(
-                        icon: const Icon(Icons.thumb_up_alt_outlined),
-                        color: Colors.white,
-                        onPressed: () {
-                          final userId = FirebaseAuth.instance.currentUser!.uid;
+                      /// Botón con estado (ya votado o no)
+                      StreamBuilder<DocumentSnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('posts')
+                            .doc(postDoc.id)
+                            .collection('votes')
+                            .doc(userId)
+                            .snapshots(),
+                        builder: (context, voteSnapshot) {
+                          final hasVoted = voteSnapshot.data?.exists ?? false;
 
-                          PostService().votePost(postDoc.id, userId);
+                          return IconButton(
+                            icon: Icon(
+                              hasVoted
+                                  ? Icons.thumb_up
+                                  : Icons.thumb_up_outlined,
+                              color: hasVoted
+                                  ? Colors.greenAccent
+                                  : Colors.white,
+                            ),
+                            onPressed: () {
+                              PostService().votePost(postDoc.id, userId);
+                            },
+                          );
                         },
                       ),
                     ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/challenge_service.dart';
 import '../../services/post_service.dart';
 import '../../models/challenge.dart';
@@ -25,6 +26,9 @@ class _ChallengePageState extends State<ChallengePage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final isAdmin = user?.email == "admin@redl.com";
+
     return FutureBuilder<Challenge?>(
       future: _challengeFuture,
       builder: (context, snapshot) {
@@ -35,9 +39,31 @@ class _ChallengePageState extends State<ChallengePage> {
 
         /// ❌ Sin reto
         if (!snapshot.hasData || snapshot.data == null) {
-          return const Text(
-            "No hay retos disponibles",
-            style: TextStyle(color: Colors.white),
+          return Column(
+            children: [
+              const Text(
+                "No hay retos disponibles",
+                style: TextStyle(color: Colors.white),
+              ),
+
+              /// 👑 Botón admin incluso sin reto
+              if (isAdmin) ...[
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                  ),
+                  onPressed: () {
+                    ChallengeService().createChallenge(
+                      "Nuevo reto",
+                      "Descripción del reto",
+                      10,
+                    );
+                  },
+                  child: const Text("Crear reto del día"),
+                ),
+              ],
+            ],
           );
         }
 
@@ -51,10 +77,10 @@ class _ChallengePageState extends State<ChallengePage> {
           decoration: BoxDecoration(
             color: const Color(0xFF1F2937),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.redAccent.withOpacity(0.5)),
+            border: Border.all(color: Colors.redAccent.withValues(alpha: 0.5)),
             boxShadow: [
               BoxShadow(
-                color: Colors.redAccent.withOpacity(0.2),
+                color: Colors.redAccent.withValues(alpha: 0.2),
                 blurRadius: 10,
                 spreadRadius: 1,
               ),
@@ -134,6 +160,24 @@ class _ChallengePageState extends State<ChallengePage> {
                   );
                 },
               ),
+
+              /// 👑 Botón solo admin
+              if (isAdmin) ...[
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                  ),
+                  onPressed: () {
+                    ChallengeService().createChallenge(
+                      "Nuevo reto",
+                      "Descripción del reto",
+                      10,
+                    );
+                  },
+                  child: const Text("Crear reto del día"),
+                ),
+              ],
             ],
           ),
         );

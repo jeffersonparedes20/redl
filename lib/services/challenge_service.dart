@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/challenge.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// Servicio encargado de comunicarse con Firestore para obtener los retos del juego
 
@@ -33,6 +34,31 @@ class ChallengeService {
       /// En caso de error lo mostramos en consola
       debugPrint("Error obteniendo challenge: $e");
       return null;
+    }
+  }
+
+  Future<void> createChallenge(
+    String title,
+    String description,
+    int requiredClues,
+  ) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      // 🔒 SOLO ADMIN
+      if (user?.email != "admin@redl.com") {
+        throw Exception("No autorizado");
+      }
+
+      await _firestore.collection('challenges').add({
+        'title': title,
+        'description': description,
+        'requiredClues': requiredClues,
+        'status': 'active',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint("Error creando challenge: $e");
     }
   }
 }
