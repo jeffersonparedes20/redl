@@ -68,12 +68,14 @@ class AuthService {
         email: email,
         password: password,
       );
-
+      // Si el inicio de sesión es exitoso, obtenemos el usuario
       final user = result.user;
 
+      // Verificamos que el usuario tenga un perfil en Firestore (por si se creó solo en Auth)
       if (user != null) {
         final userDoc = _firestore.collection('users').doc(user.uid);
 
+        // Obtenemos el documento del usuario
         final snapshot = await userDoc.get();
 
         /// Si el usuario no existe en Firestore lo creamos
@@ -86,7 +88,7 @@ class AuthService {
           });
         }
       }
-
+      // Devolvemos el usuario autenticado
       return user;
     } catch (e) {
       debugPrint("Error en login: $e");

@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../challenge/challenge_page.dart';
 import '../posts/posts_page.dart';
+import '../posts/posts_feed.dart';
 import '../profile/profile_page.dart';
 import '../auth/auth_service.dart';
 
+/// Página principal que muestra el reto activo y el feed de pistas
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
+  // Construimos la interfaz de la página principal
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     final authService = AuthService();
@@ -24,9 +26,8 @@ class HomePage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-
         actions: [
-          // Email del usuario
+          // Email
           Padding(
             padding: const EdgeInsets.all(12),
             child: Center(
@@ -48,7 +49,7 @@ class HomePage extends StatelessWidget {
             },
           ),
 
-          /// 🔓 Logout
+          // Logout
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.redAccent),
             onPressed: () async {
@@ -58,10 +59,45 @@ class HomePage extends StatelessWidget {
         ],
       ),
 
-      // Contenido principal (reto del día)
-      body: const ChallengePage(),
+      // CONTENIDO PRINCIPAL
+      body: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Reto del día
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: ChallengePage(),
+          ),
 
-      // Botón para ver/publicar pistas
+          SizedBox(height: 20),
+
+          //Título
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              ">> PISTAS DE LA COMUNIDAD",
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+                fontSize: 16,
+              ),
+            ),
+          ),
+
+          SizedBox(height: 10),
+
+          // Feed (scroll aquí)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: PostsFeed(),
+            ),
+          ),
+        ],
+      ),
+
+      // Botón para publicar pistas
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.redAccent,
         onPressed: () {
@@ -70,7 +106,7 @@ class HomePage extends StatelessWidget {
             MaterialPageRoute(builder: (_) => PostsPage()),
           );
         },
-        child: const Icon(Icons.forum),
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -7,13 +7,13 @@ import 'login_page.dart';
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
+  // Escuchamos cambios en el estado de autenticación
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
-
       builder: (context, snapshot) {
-        /// Mientras carga
+        // Mientras se verifica el estado de autenticación, mostramos un indicador de carga
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),

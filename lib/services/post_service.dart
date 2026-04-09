@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/post.dart';
 import 'user_service.dart';
 
@@ -20,10 +21,12 @@ class PostService {
         });
   }
 
-  /// Crear nueva pista
+  // Crear una nueva pista
   Future<void> createPost(String text, String userId) async {
+    if (text.trim().isEmpty) return;
     await _firestore.collection('posts').add({
       'userId': userId,
+      'userEmail': FirebaseAuth.instance.currentUser?.email,
       'text': text,
       'votes': 0,
       'createdAt': FieldValue.serverTimestamp(),
@@ -42,9 +45,35 @@ class PostService {
   }
 
   /// Incrementar votos de una pista
-  Future<void> votePost(String postId) async {
+  Future<void> votePost(String postId, String userId) async {
+    final voteRef = _firestore
+        .collection('posts')
+        .doc(postId)
+        .collection('votes')
+        .doc(userId);
+
+    final voteDoc = await voteRef.get();
+
+    //  Verificar si el usuario ya ha votado
+    if (voteDoc.exists) return;
+
+    // Registrar voto
+    await voteRef.set({'voted': true});
+
+    //  Incrementar contador
     await _firestore.collection('posts').doc(postId).update({
       'votes': FieldValue.increment(1),
+    });
+  }
+
+  // Obtener total de votos en todas las pistas
+  Stream<int> getTotalVotes() {
+    return _firestore.collection('posts').snapshots().map((snapshot) {
+      int total = 0;
+      for (var doc in snapshot.docs) {
+        total += (doc['votes'] ?? 0) as int;
+      }
+      return total;
     });
   }
 }
