@@ -30,12 +30,11 @@ class AuthService {
       if (user != null) {
         /*
         Se crea un documento con ID = UID del usuario.
-        Esto garantiza correspondencia 1:1 entre Auth y Firestore.
 
         Campos almacenados:
         - email: identificador visible
         - nivel: estado inicial del usuario
-        - puntos: sistema de gamificación
+        - puntos: nivel inicial de puntos
          - createdAt: timestamp generado por el servidor
         */
         await _firestore.collection('users').doc(user.uid).set({
@@ -78,7 +77,7 @@ class AuthService {
         // Obtenemos el documento del usuario
         final snapshot = await userDoc.get();
 
-        /// Si el usuario no existe en Firestore lo creamos
+        // Si el usuario no existe en Firestore lo creamos
         if (!snapshot.exists) {
           await userDoc.set({
             'email': email,
@@ -96,7 +95,7 @@ class AuthService {
     }
   }
 
-  // LOGOUT
+  // Cierre de sesión
   Future<void> logout() async {
     await _auth.signOut();
   }

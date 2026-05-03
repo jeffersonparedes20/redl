@@ -3,12 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/post.dart';
 import 'user_service.dart';
 
-/// Servicio que gestiona las pistas publicadas
+// Clase encargada de gestionar las pistas (posts) en Firestore
 class PostService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final UserService _userService = UserService();
 
-  /// Obtiene todas las pistas ordenadas por fecha
+  // Obtiene todas las pistas ordenadas por fecha
   Stream<List<Post>> getPosts() {
     return _firestore
         .collection('posts')
@@ -32,11 +32,11 @@ class PostService {
       'createdAt': FieldValue.serverTimestamp(),
     });
 
-    /// Añadimos puntos al usuario
+    // Añadimos puntos al usuario
     await _userService.addPoints(userId);
   }
 
-  /// Contar número total de pistas
+  // Contar número total de pistas
   Stream<int> getPostCount() {
     return _firestore
         .collection('posts')
@@ -44,7 +44,7 @@ class PostService {
         .map((snapshot) => snapshot.docs.length);
   }
 
-  /// Incrementar votos de una pista
+  //  Incrementar votos de una pista
   Future<void> votePost(String postId, String userId) async {
     final voteRef = _firestore
         .collection('posts')
@@ -75,5 +75,14 @@ class PostService {
       }
       return total;
     });
+  }
+
+  // Eliminar todas las pistas
+  Future<void> deleteAllPosts() async {
+    final posts = await FirebaseFirestore.instance.collection('posts').get();
+
+    for (var doc in posts.docs) {
+      await doc.reference.delete();
+    }
   }
 }

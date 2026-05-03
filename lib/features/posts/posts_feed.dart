@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/post_service.dart';
 
-/// Widget que muestra el feed de pistas (sin Scaffold)
+// Widget que muestra el feed de pistas
 class PostsFeed extends StatelessWidget {
   const PostsFeed({super.key});
 
@@ -16,14 +16,13 @@ class PostsFeed extends StatelessWidget {
           .limit(20)
           .snapshots(),
       builder: (context, snapshot) {
-        // ⏳ Cargando
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
         final posts = snapshot.data!.docs;
 
-        // 📭 Sin posts
+        //si no hay posts, mostrar mensaje
         if (posts.isEmpty) {
           return const Center(
             child: Text(
@@ -33,7 +32,7 @@ class PostsFeed extends StatelessWidget {
           );
         }
 
-        // 📜 Lista de posts
+        // Lista de posts
         return ListView.builder(
           itemCount: posts.length,
           itemBuilder: (context, index) {
@@ -62,7 +61,7 @@ class PostsFeed extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// 👤 Usuario
+                  // Usuario y email
                   Row(
                     children: [
                       const Icon(Icons.person, size: 14, color: Colors.grey),
@@ -79,7 +78,7 @@ class PostsFeed extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  /// 💬 Texto
+                  // Texto de la pista
                   Text(
                     data['text'] ?? "",
                     style: const TextStyle(
@@ -91,11 +90,11 @@ class PostsFeed extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  /// 👍 Votos + botón dinámico
+                  // Votos y botón de votar
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      /// Contador votos
+                      // Contador votos con icono
                       Row(
                         children: [
                           const Icon(
@@ -114,7 +113,7 @@ class PostsFeed extends StatelessWidget {
                         ],
                       ),
 
-                      /// Botón con estado (ya votado o no)
+                      // Botón con estado de voto
                       StreamBuilder<DocumentSnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('posts')

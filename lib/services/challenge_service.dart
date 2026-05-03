@@ -1,42 +1,37 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/challenge.dart';
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-/// Servicio encargado de comunicarse con Firestore para obtener los retos del juego
-
+// Servicio encargado de comunicarse con Firestore para gestionar retos
 class ChallengeService {
-  /// Instancia de Firestore para conectarse a la base de datos y realizar consultas
+  // Instancia de Firestore
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Obtiene el reto activo del día
+  // Obtiene el reto activo del día
   Future<Challenge?> getActiveChallenge() async {
     try {
-      /// Consulta la colección "challenges" a la base de datos
       final query = await _firestore
           .collection('challenges')
           .where('status', isEqualTo: 'active')
-          .limit(1) // Solo queremos un reto activo
+          .limit(1)
           .get();
 
-      /// Si no hay retos activos devolvemos null
+      // Si no hay retos activos devolvemos null
       if (query.docs.isEmpty) {
         return null;
       }
 
-      /// Tomamos el primer documento encontrado
       final doc = query.docs.first;
 
-      /// Convertimos los datos de Firestore
-      /// en un objeto Challenge
       return Challenge.fromFirestore(doc.data(), doc.id);
     } catch (e) {
-      /// En caso de error lo mostramos en consola
       debugPrint("Error obteniendo challenge: $e");
       return null;
     }
   }
 
+  // Crear nuevo reto (solo admin)
   Future<void> createChallenge(
     String title,
     String description,
@@ -45,11 +40,30 @@ class ChallengeService {
     try {
       final user = FirebaseAuth.instance.currentUser;
 
-      // 🔒 SOLO ADMIN
-      if (user?.email != "admin@redl.com") {
+      // Verificar usuario logueado y permisos de administrador
+      if (user == null) {
+        throw Exception("Usuario no autenticado");
+      }
+
+      final email = user.email?.trim().toLowerCase();
+
+      //Solo administrador con email específico puede crear retos
+      if (email != "admin@redl.com") {
         throw Exception("No autorizado");
       }
 
+      // Buscar retos activos
+      final activeChallenges = await _firestore
+          .collection('challenges')
+          .where('status', isEqualTo: 'active')
+          .get();
+
+      // Desactivar retos anteriores
+      for (var doc in activeChallenges.docs) {
+        await doc.reference.update({'status': 'inactive'});
+      }
+
+      // Crear nuevo reto activo
       await _firestore.collection('challenges').add({
         'title': title,
         'description': description,
@@ -57,6 +71,9 @@ class ChallengeService {
         'status': 'active',
         'createdAt': FieldValue.serverTimestamp(),
       });
+
+      // Si llegamos aquí, el reto se creó correctamente
+      debugPrint("Challenge creado correctamente");
     } catch (e) {
       debugPrint("Error creando challenge: $e");
     }

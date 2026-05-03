@@ -3,11 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../home/home_page.dart';
 import 'login_page.dart';
 
-/// Decide si mostrar login o home
+// AuthGate es el widget que decide qué pantalla mostrar según el estado de autenticación del usuario
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
-  // Escuchamos cambios en el estado de autenticación
+  // El widget escucha los cambios en el estado de autenticación del usuario
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
@@ -20,7 +20,7 @@ class AuthGate extends StatelessWidget {
           );
         }
 
-        /// Si el usuario está logueado → Home
+        // Si el usuario está autenticado → Home
         if (snapshot.hasData) {
           return const HomePage();
         }
